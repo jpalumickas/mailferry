@@ -1,5 +1,5 @@
-import { MailServerProviderError } from '@/errors'
-import { EmailData } from '@/types'
+import { MailServerProviderError } from '../../errors.js'
+import type { EmailData } from '../../types.js'
 
 function urlEncodeObject(obj: { [s: string]: any }) {
   return Object.keys(obj)
@@ -29,7 +29,7 @@ export const sendMailgunEmail = async ({
     body: dataUrlEncoded,
   }
 
-  console.log(`[Mailferry] [MailGun Provider] Sending email to ${data.to}`)
+  console.log(`[Mailferry] [Mailgun Provider] Sending email to ${data.to}`)
 
   const response = await fetch(`https://${apiHost}/v3/${domain}/messages`, opts)
 
@@ -40,7 +40,7 @@ export const sendMailgunEmail = async ({
   }
 
   console.log(
-    `[Mailferry] [MailGun Provider] Email sent to ${data.to} successfully`
+    `[Mailferry] [Mailgun Provider] Email sent to ${data.to} successfully`
   )
 
   const result = await response.json()

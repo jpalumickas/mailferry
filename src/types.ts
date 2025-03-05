@@ -1,5 +1,5 @@
 import type { z } from 'zod'
-import type { emailDataSchema } from './validationSchemas/emailDataSchema'
+import type { emailDataSchema } from './validationSchemas/emailDataSchema.js'
 
 export type Options = {
   supportedLocales: string[]

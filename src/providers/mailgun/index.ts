@@ -8,7 +8,7 @@ type Args = {
 
 export const createMailgunProvider = ({ apiKey, apiHost, domain }: Args) => {
   return {
-    sendEmail: async (data: any) => {
+    sendEmail: async ({ data }: { data: any }) => {
       sendMailgunEmail({ apiKey, apiHost, domain, data })
     },
   }

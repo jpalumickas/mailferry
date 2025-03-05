@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { renderEmailTemplate } from './renderEmailTemplate.js'
 import type { Options } from '../types.js'
-import { emailDataSchema } from '@/validationSchemas/emailDataSchema.js'
+import { emailDataSchema } from '../validationSchemas/emailDataSchema.js'
 
 export const sendEmailTemplateSchema = z.object({
   emailTemplate: z.string(),

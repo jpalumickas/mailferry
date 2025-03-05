@@ -1,0 +1,21 @@
+import type { z } from 'zod'
+import type { emailDataSchema } from './validationSchemas/emailDataSchema'
+
+export type Options = {
+  supportedLocales: string[]
+  templates: EmailTemplates
+  from: {
+    email: string
+    name?: string
+  }
+  onError?: (error: unknown) => void
+  provider: Provider
+}
+
+export type EmailTemplates = Record<string, React.ComponentType<any>>
+
+export type EmailData = z.infer<typeof emailDataSchema>
+
+export type Provider = {
+  sendEmail: (options: { data: EmailData }) => Promise<unknown>
+}

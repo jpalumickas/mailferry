@@ -10,6 +10,7 @@ export type Options = {
   }
   onError?: (error: unknown) => void
   provider: Provider
+  createSubject?: (options: { locale: string; template: string }) => string
 }
 
 export type CreateOptions<Env extends object> = ({

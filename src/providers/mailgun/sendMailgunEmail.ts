@@ -1,3 +1,4 @@
+import { MailServerProviderError } from '@/errors'
 import { EmailData } from '@/types'
 
 function urlEncodeObject(obj: { [s: string]: any }) {
@@ -28,15 +29,19 @@ export const sendMailgunEmail = async ({
     body: dataUrlEncoded,
   }
 
-  console.log(`Sending email to ${data.to}`)
+  console.log(`[Mailferry] [MailGun Provider] Sending email to ${data.to}`)
 
   const response = await fetch(`https://${apiHost}/v3/${domain}/messages`, opts)
 
   if (!response.ok) {
-    throw new Error(`Send email failed. Status: ${response.status}`)
+    throw new MailServerProviderError(
+      `Send email failed. Status: ${response.status}`
+    )
   }
 
-  console.log(`Email sent to ${data.to} successfully`)
+  console.log(
+    `[Mailferry] [MailGun Provider] Email sent to ${data.to} successfully`
+  )
 
   const result = await response.json()
   return result

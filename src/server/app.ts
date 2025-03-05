@@ -9,6 +9,7 @@ type Data = {
     email: string
     name: string
   }
+  subject?: string | undefined | null
   data?: Record<string, string | number>
 }
 
@@ -63,10 +64,25 @@ export const createApp = <Env extends object>(
       })
     }
 
+    const subject =
+      data.subject?.trim() ||
+      options.createSubject?.({
+        locale: data.locale,
+        template: emailTemplate,
+      })
+
+    if (!subject?.trim()) {
+      return new Response(JSON.stringify({ error: 'Subject is required' }), {
+        status: 422,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
     const result = await sendEmailTemplate({
       options,
       data: {
         emailTemplate,
+        subject,
         locale: data.locale,
         to: data.to,
         data: data.data || {},

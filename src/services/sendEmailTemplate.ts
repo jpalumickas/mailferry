@@ -9,6 +9,7 @@ export const sendEmailTemplateSchema = z.object({
     email: z.string().email().trim(),
     name: z.string().trim().optional().nullable(),
   }),
+  subject: z.string(),
   locale: z.string(),
   data: z.object({}).passthrough().optional().nullable().default({}),
 })
@@ -22,15 +23,17 @@ export const sendEmailTemplate = async ({
   options: Options
   data: Data
 }) => {
-  const { emailTemplate, locale, to, data } =
+  const { emailTemplate, locale, to, subject, data } =
     await sendEmailTemplateSchema.parseAsync(providedData)
 
-  console.log(`Sending email template ${emailTemplate} to ${to.email}`)
+  console.log(
+    `[Mailferry] Sending email template "${emailTemplate}" to "${to.email}"`
+  )
 
-  const { subject, html, text } = await renderEmailTemplate({
+  const { html, text } = await renderEmailTemplate({
     options,
     template: emailTemplate,
-    subject: 'TODO',
+    subject,
     locale,
     data,
   })
@@ -50,7 +53,7 @@ export const sendEmailTemplate = async ({
   })
 
   console.log(
-    `Email template ${emailTemplate} sent to ${to.email} successfully`
+    `[Mailferry] Email template "${emailTemplate}" sent to "${to.email}" successfully`
   )
 
   return {

@@ -23,10 +23,12 @@ export const createQueue =
         try {
           const subject =
             message.body.subject ||
-            options.createSubject?.({
-              locale: message.body.locale,
-              template: message.body.template,
-            })
+            (options.createSubject
+              ? await options.createSubject({
+                  locale: message.body.locale,
+                  template: message.body.template,
+                })
+              : undefined)
 
           if (!subject?.trim()) {
             throw new MailServerValidationError('Subject is required')

@@ -66,10 +66,12 @@ export const createApp = <Env extends object>(
 
     const subject =
       data.subject?.trim() ||
-      options.createSubject?.({
-        locale: data.locale,
-        template: emailTemplate,
-      })
+      (options.createSubject
+        ? await options.createSubject({
+            locale: data.locale,
+            template: emailTemplate,
+          })
+        : undefined)
 
     if (!subject?.trim()) {
       return new Response(JSON.stringify({ error: 'Subject is required' }), {

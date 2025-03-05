@@ -1,10 +1,12 @@
 import { createApp } from './server/app.js'
 import { createQueue } from './server/queue.js'
-import { Options } from './types.js'
+import type { CreateOptions } from './types.js'
 
-export const createHandler = (options: Options) => {
-  const { app } = createApp(options)
-  const queue = createQueue(options)
+export const createHandler = <Env extends object>(
+  createOptions: CreateOptions<Env>
+) => {
+  const { app } = createApp(createOptions)
+  const queue = createQueue(createOptions)
 
   return {
     fetch: app.fetch,

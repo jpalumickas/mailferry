@@ -12,6 +12,12 @@ export type Options = {
   provider: Provider
 }
 
+export type CreateOptions<Env extends object> = ({
+  env,
+}: {
+  env: Env
+}) => Options
+
 export type EmailTemplates = Record<string, React.ComponentType<any>>
 
 export type EmailData = z.infer<typeof emailDataSchema>

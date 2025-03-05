@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { sendEmailTemplate } from '../services/sendEmailTemplate.js'
 import { renderEmailTemplate } from '../services/renderEmailTemplate.js'
-import { Options } from '../types.js'
+import type { CreateOptions } from '../types.js'
 
 type Data = {
   locale: string
@@ -12,10 +12,13 @@ type Data = {
   data?: Record<string, string | number>
 }
 
-export const createApp = (options: Options) => {
-  const app = new Hono()
+export const createApp = <Env extends object>(
+  createOptions: CreateOptions<Env>
+) => {
+  const app = new Hono<{ Bindings: Env }>()
 
   app.post('/emails/:emailTemplate/render/:format', async (c) => {
+    const options = createOptions({ env: c.env })
     const emailTemplate = c.req.param('emailTemplate')
     const format = c.req.param('format')
     const data = await c.req.json<Data>()
@@ -36,6 +39,8 @@ export const createApp = (options: Options) => {
   })
 
   app.post('/emails/:emailTemplate/send', async (c) => {
+    const options = createOptions({ env: c.env })
+
     const contentType = c.req.header('content-type')
     if (
       !contentType ||

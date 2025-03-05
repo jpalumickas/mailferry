@@ -1,5 +1,5 @@
 import { sendEmailTemplate } from '../services/sendEmailTemplate.js'
-import type { Options } from '../types.js'
+import type { CreateOptions, Options } from '../types.js'
 
 type Data = {
   template: string
@@ -12,8 +12,10 @@ type Data = {
 }
 
 export const createQueue =
-  <Env extends object>(options: Options) =>
+  <Env extends object>(createOptions: CreateOptions<Env>) =>
   async (batch: MessageBatch<Data>, env: Env) => {
+    const options = createOptions({ env })
+
     try {
       for (const message of batch.messages) {
         try {

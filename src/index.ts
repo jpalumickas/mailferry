@@ -13,3 +13,5 @@ export const createHandler = <Env extends object>(
     queue,
   }
 }
+
+export { renderEmailTemplate } from './services/renderEmailTemplate.js'

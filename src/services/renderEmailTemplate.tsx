@@ -4,7 +4,7 @@ import type { Options } from '../types.js'
 import { MailServerValidationError } from '../errors.js'
 
 type Props = {
-  options: Options
+  options: Pick<Options, 'templates' | 'supportedLocales'>
   template: string
   locale: string
   subject: string

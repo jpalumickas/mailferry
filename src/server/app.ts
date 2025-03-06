@@ -29,7 +29,6 @@ export const createApp = <Env extends object>(
       template: emailTemplate,
       locale: data.locale,
       data: data.data || {},
-      subject: 'TODO',
     })
 
     if (format === 'txt') {

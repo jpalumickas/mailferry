@@ -33,7 +33,6 @@ export const sendEmailTemplate = async ({
   const { html, text } = await renderEmailTemplate({
     options,
     template: emailTemplate,
-    subject,
     locale,
     data,
   })

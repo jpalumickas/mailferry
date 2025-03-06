@@ -7,7 +7,6 @@ type Props = {
   options: Pick<Options, 'templates' | 'supportedLocales'>
   template: string
   locale: string
-  subject: string
   data: any
 }
 

@@ -1,9 +1,9 @@
-import { describe, test, expect, vi } from 'vitest'
+import { describe, test, expect } from 'vitest'
 import { createApp } from '../../src/server/app'
 import { createMailgunProvider } from '../../src/providers/mailgun'
 
 describe('Example', () => {
-  const { app } = createApp((env) => ({
+  const { app } = createApp(() => ({
     provider: createMailgunProvider({
       apiKey: 'test',
       domain: 'example.com',

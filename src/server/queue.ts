@@ -34,7 +34,7 @@ export const createQueue =
             throw new MailServerValidationError('Subject is required')
           }
 
-          const result = await sendEmailTemplate({
+          await sendEmailTemplate({
             options,
             data: {
               emailTemplate: message.body.template,

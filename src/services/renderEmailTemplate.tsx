@@ -34,5 +34,5 @@ export const renderEmailTemplate = async ({
     plainText: true,
   })
 
-  return { html: html.replace(/react\-email\-/g, ''), text }
+  return { html: html.replace(/react-email-/g, ''), text }
 }

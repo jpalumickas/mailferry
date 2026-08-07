@@ -4,14 +4,24 @@
   "type": "module",
   "exports": {
     "./providers/mailgun": {
-      "types": "./dist/providers/mailgun/index.d.ts",
-      "require": "./dist/providers/mailgun/index.cjs",
-      "default": "./dist/providers/mailgun/index.js"
+      "require": {
+        "types": "./dist/providers/mailgun/index.d.cts",
+        "default": "./dist/providers/mailgun/index.cjs"
+      },
+      "default": {
+        "types": "./dist/providers/mailgun/index.d.mts",
+        "default": "./dist/providers/mailgun/index.mjs"
+      }
     },
     ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs",
-      "default": "./dist/index.js"
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      },
+      "default": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      }
     }
   },
   "files": [
@@ -21,15 +31,15 @@
   "dependencies": {
     "@react-email/render": "^1.0.5",
     "hono": "^4.13.0",
-    "zod": "^3.24.2"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260804.1",
     "@types/react": "^19.2.18",
     "prettier": "^3.9.6",
     "react": "^19.2.8",
-    "rimraf": "^6.1.3",
-    "tsup": "^8.5.1",
+    "react-dom": "^19.2.8",
+    "tsdown": "^0.22.14",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   },
@@ -37,12 +47,10 @@
     "react": ">= 18.3.1"
   },
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
+    "build": "tsdown",
+    "dev": "tsdown --watch",
     "test": "vitest run",
-    "test:dev": "vitest dev",
-    "clean": "rimraf dist",
-    "clean:full": "rimraf .turbo node_modules dist"
+    "test:dev": "vitest dev"
   },
   "packageManager": "pnpm@11.20.0+sha512.9a6f330a95b66446ea088faf1521405a8a01f07fde7124cc9958dfed52d4bb436737e65b08f85f37b46fcba375092558ac51262b816844b22f63406ed166bfee"
 }

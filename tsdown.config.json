@@ -1,6 +1,6 @@
 {
   "clean": true,
-  "dts": true,
+  "dts": { "sourcemap": false },
   "entry": ["src/index.ts", "src/providers/mailgun/index.ts"],
   "format": ["cjs", "esm"],
   "minify": true,

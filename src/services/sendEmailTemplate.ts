@@ -6,12 +6,12 @@ import { emailDataSchema } from '../validationSchemas/emailDataSchema.js'
 export const sendEmailTemplateSchema = z.object({
   emailTemplate: z.string(),
   to: z.object({
-    email: z.string().email().trim(),
+    email: z.email().trim(),
     name: z.string().trim().optional().nullable(),
   }),
   subject: z.string(),
   locale: z.string(),
-  data: z.object({}).passthrough().optional().nullable().default({}),
+  data: z.looseObject({}).optional().nullable().default({}),
 })
 
 type Data = z.infer<typeof sendEmailTemplateSchema>

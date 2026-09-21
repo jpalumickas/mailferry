@@ -4,6 +4,7 @@ import { createApp } from '../../src/server/app'
 const createTestApp = () =>
   createApp(() => ({
     provider: { sendEmail: vi.fn() },
+    accessToken: 'test-token',
     supportedLocales: ['en', 'es'],
     from: { email: 'company@example.com', name: 'Company Inc' },
     templates: {
@@ -20,7 +21,10 @@ describe('POST /emails/:emailTemplate/render/:format', () => {
     return app.request(`/emails/welcome/render/${format}`, {
       method: 'POST',
       body: JSON.stringify(body),
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        Authorization: 'Bearer test-token',
+        'Content-Type': 'application/json',
+      },
     })
   }
 
@@ -71,10 +75,25 @@ describe('POST /emails/:emailTemplate/render/:format', () => {
     const res = await app.request('/emails/welcome/render/html', {
       method: 'POST',
       body: '{',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        Authorization: 'Bearer test-token',
+        'Content-Type': 'application/json',
+      },
     })
 
     expect(res.status).toBe(400)
     expect(await res.json()).toStrictEqual({ error: 'Invalid JSON' })
+  })
+
+  test('requires a bearer token for rendering', async () => {
+    const { app } = createTestApp()
+    const res = await app.request('/emails/welcome/render/html', {
+      method: 'POST',
+      body: JSON.stringify({ locale: 'en' }),
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    expect(res.status).toBe(401)
+    expect(await res.json()).toStrictEqual({ error: 'Unauthorized' })
   })
 })

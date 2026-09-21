@@ -3,7 +3,8 @@ import { ZodError } from 'zod'
 import { sendEmailTemplate } from '../services/sendEmailTemplate.js'
 import { renderEmailTemplate } from '../services/renderEmailTemplate.js'
 import { MailServerValidationError } from '../errors.js'
-import type { CreateOptions } from '../types.js'
+import { tokensMatch } from '../utils/tokensMatch.js'
+import type { CreateOptions, Options } from '../types.js'
 
 type Data = {
   locale: string
@@ -18,7 +19,25 @@ type Data = {
 export const createApp = <Env extends object>(
   createOptions: CreateOptions<Env>
 ) => {
-  const app = new Hono<{ Bindings: Env }>()
+  const app = new Hono<{ Bindings: Env; Variables: { options: Options } }>()
+
+  app.use('/emails/*', async (c, next) => {
+    const options = createOptions({ env: c.env })
+    const authorization = c.req.header('authorization')
+    const provided = /^Bearer ([^\s]+)$/i.exec(authorization || '')?.[1]
+
+    if (
+      !options.accessToken ||
+      !provided ||
+      !(await tokensMatch(provided, options.accessToken))
+    ) {
+      c.header('WWW-Authenticate', 'Bearer')
+      return c.json({ error: 'Unauthorized' }, 401)
+    }
+
+    c.set('options', options)
+    await next()
+  })
 
   app.onError((error, c) => {
     if (
@@ -33,7 +52,7 @@ export const createApp = <Env extends object>(
   })
 
   app.post('/emails/:emailTemplate/render/:format', async (c) => {
-    const options = createOptions({ env: c.env })
+    const options = c.get('options')
     const emailTemplate = c.req.param('emailTemplate')
     const format = c.req.param('format')
     let data: Data
@@ -62,7 +81,7 @@ export const createApp = <Env extends object>(
   })
 
   app.post('/emails/:emailTemplate/send', async (c) => {
-    const options = createOptions({ env: c.env })
+    const options = c.get('options')
 
     const contentType = c.req.header('content-type')
     if (

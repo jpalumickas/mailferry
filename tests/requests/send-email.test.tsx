@@ -4,6 +4,7 @@ import { createMailgunProvider } from '../../src/providers/mailgun'
 
 describe('Example', () => {
   const { app } = createApp(() => ({
+    accessToken: 'test-token',
     provider: createMailgunProvider({
       apiKey: 'test',
       domain: 'example.com',
@@ -39,7 +40,10 @@ describe('Example', () => {
       const res = await app.request('/emails/welcome/send', {
         method: 'POST',
         body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          Authorization: 'Bearer test-token',
+          'Content-Type': 'application/json',
+        },
       })
       expect(res.status).toBe(200)
 

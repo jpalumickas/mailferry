@@ -9,6 +9,8 @@ export type Options = {
     name?: string
   }
   onError?: (error: unknown) => void | Promise<void>
+  /** Required for HTTP requests; queue consumers do not use this token. */
+  accessToken?: string
   provider: Provider
   createSubject?: (options: {
     locale: string

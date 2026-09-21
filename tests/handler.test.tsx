@@ -1,14 +1,17 @@
 import { describe, test, expect, vi } from 'vitest'
 import { createHandler } from '../src/index'
+import type { Options } from '../src/types'
 
-const createTestHandler = () => {
+const createTestHandler = (overrides: Partial<Options> = {}) => {
   const sendEmail = vi.fn(async () => ({ id: 'mailgun-id' }))
 
   const handler = createHandler(() => ({
+    accessToken: 'test-token',
     provider: { sendEmail },
     supportedLocales: ['en'],
     from: { email: 'company@example.com', name: 'Company Inc' },
     templates: { welcome: () => <div>Welcome</div> },
+    ...overrides,
   }))
 
   return { handler, sendEmail }
@@ -26,7 +29,10 @@ describe('createHandler', () => {
           to: { email: 'john@example.com', name: 'John Doe' },
           subject: 'Welcome to our platform',
         }),
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          Authorization: 'Bearer test-token',
+          'Content-Type': 'application/json',
+        },
       }),
       {},
       {} as ExecutionContext
@@ -38,7 +44,7 @@ describe('createHandler', () => {
   })
 
   test('exposes a queue consumer', async () => {
-    const { handler, sendEmail } = createTestHandler()
+    const { handler, sendEmail } = createTestHandler({ accessToken: undefined })
 
     await handler.queue(
       {

@@ -7,6 +7,7 @@ const createTestApp = (overrides: Partial<Options> = {}) => {
 
   const { app } = createApp(() => ({
     provider: { sendEmail },
+    accessToken: 'test-token',
     supportedLocales: ['en'],
     from: { email: 'company@example.com', name: 'Company Inc' },
     templates: { welcome: () => <div>Welcome</div> },
@@ -25,9 +26,60 @@ const body = {
 const send = (
   app: ReturnType<typeof createTestApp>['app'],
   init: RequestInit
-) => app.request('/emails/welcome/send', { method: 'POST', ...init })
+) => {
+  const headers = new Headers(init.headers)
+  headers.set('Authorization', 'Bearer test-token')
+  return app.request('/emails/welcome/send', {
+    method: 'POST',
+    ...init,
+    headers,
+  })
+}
 
 describe('POST /emails/:emailTemplate/send', () => {
+  test('rejects requests without a bearer token', async () => {
+    const { app, sendEmail } = createTestApp()
+
+    const res = await app.request('/emails/welcome/send', {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    expect(res.status).toBe(401)
+    expect(res.headers.get('WWW-Authenticate')).toBe('Bearer')
+    expect(await res.json()).toStrictEqual({ error: 'Unauthorized' })
+    expect(sendEmail).not.toHaveBeenCalled()
+  })
+
+  test('rejects an incorrect bearer token', async () => {
+    const { app, sendEmail } = createTestApp()
+
+    const res = await app.request('/emails/welcome/send', {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: {
+        Authorization: 'Bearer wrong-token',
+        'Content-Type': 'application/json',
+      },
+    })
+
+    expect(res.status).toBe(401)
+    expect(sendEmail).not.toHaveBeenCalled()
+  })
+
+  test('rejects requests when no access token is configured', async () => {
+    const { app, sendEmail } = createTestApp({ accessToken: undefined })
+
+    const res = await send(app, {
+      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    expect(res.status).toBe(401)
+    expect(sendEmail).not.toHaveBeenCalled()
+  })
+
   test('rejects a request without a json content type', async () => {
     const { app, sendEmail } = createTestApp()
 

@@ -75,14 +75,21 @@ describe('createMailgunProvider', () => {
     const provider = createMailgunProvider(credentials)
     const result = await provider.sendEmail({ data })
 
-    // `sendEmail` does not await `sendMailgunEmail`, so the mailgun response
-    // never reaches the caller and provider errors surface as unhandled
-    // rejections instead of failing the send.
-    expect(result).toBeUndefined()
+    expect(result).toStrictEqual({ id: 'mailgun-id' })
 
     expect(fetch).toHaveBeenCalledWith(
       'https://api.example.net/v3/example.com/messages',
       expect.objectContaining({ method: 'POST' })
+    )
+  })
+
+  test('rejects when mailgun rejects the request', async () => {
+    mockFetch({ ok: false, status: 401 })
+
+    const provider = createMailgunProvider(credentials)
+
+    await expect(provider.sendEmail({ data })).rejects.toThrow(
+      new MailServerProviderError('Send email failed. Status: 401')
     )
   })
 })

@@ -30,21 +30,21 @@
   "sideEffects": false,
   "dependencies": {
     "@react-email/render": "^2.1.0",
-    "hono": "^4.13.0",
-    "zod": "^4.4.3"
+    "hono": "^4.13.8",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260804.1",
-    "@types/react": "^19.2.18",
-    "@vitest/coverage-v8": "^4.1.10",
-    "oxfmt": "^0.62.0",
-    "oxlint": "^1.77.0",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "react-email": "^6.9.1",
-    "tsdown": "^0.22.14",
+    "@cloudflare/workers-types": "^5.20260920.1",
+    "@types/react": "^19.3.0",
+    "@vitest/coverage-v8": "^5.0.1",
+    "oxfmt": "^0.68.0",
+    "oxlint": "^1.83.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-email": "^6.9.5",
+    "tsdown": "^0.23.0",
     "typescript": "^7.0.2",
-    "vitest": "^4.1.10"
+    "vitest": "^5.0.1"
   },
   "peerDependencies": {
     "react": ">= 18.3.1"
@@ -61,5 +61,5 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check"
   },
-  "packageManager": "pnpm@11.20.0+sha512.9a6f330a95b66446ea088faf1521405a8a01f07fde7124cc9958dfed52d4bb436737e65b08f85f37b46fcba375092558ac51262b816844b22f63406ed166bfee"
+  "packageManager": "pnpm@12.5.1+sha512.e3f305bc784a2bc89f5ad3b6138889470fae8d2af5f36b61216ec91c2c3d64089775f9de38aac331044ea40f245cb0d5666392dfdf65824e1907ef6a2c62de5f"
 }

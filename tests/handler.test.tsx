@@ -44,6 +44,7 @@ describe('createHandler', () => {
       {
         messages: [
           {
+            ack: vi.fn(),
             body: {
               template: 'welcome',
               locale: 'en',

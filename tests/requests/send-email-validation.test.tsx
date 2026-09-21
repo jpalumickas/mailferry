@@ -51,6 +51,67 @@ describe('POST /emails/:emailTemplate/send', () => {
     expect(sendEmail).not.toHaveBeenCalled()
   })
 
+  test('returns 422 for an invalid recipient email', async () => {
+    const { app, sendEmail } = createTestApp()
+
+    const res = await send(app, {
+      body: JSON.stringify({ ...body, to: { email: 'not-an-email' } }),
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    expect(res.status).toBe(422)
+    expect(await res.json()).toStrictEqual({ error: 'Invalid params' })
+    expect(sendEmail).not.toHaveBeenCalled()
+  })
+
+  test('returns 422 for a non-string subject', async () => {
+    const { app, sendEmail } = createTestApp()
+
+    const res = await send(app, {
+      body: JSON.stringify({ ...body, subject: 123 }),
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    expect(res.status).toBe(422)
+    expect(await res.json()).toStrictEqual({ error: 'Invalid params' })
+    expect(sendEmail).not.toHaveBeenCalled()
+  })
+
+  test('returns 400 for malformed JSON', async () => {
+    const { app, sendEmail } = createTestApp()
+
+    const res = await send(app, {
+      body: '{',
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    expect(res.status).toBe(400)
+    expect(await res.json()).toStrictEqual({ error: 'Invalid JSON' })
+    expect(sendEmail).not.toHaveBeenCalled()
+  })
+
+  test('returns 500 for an unexpected provider failure', async () => {
+    const error = new Error('Provider unavailable')
+    const sendEmail = vi.fn(async () => {
+      throw error
+    })
+    const { app } = createTestApp({ provider: { sendEmail } })
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    try {
+      const res = await send(app, {
+        body: JSON.stringify(body),
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      expect(res.status).toBe(500)
+      expect(await res.json()).toStrictEqual({ error: 'Internal Server Error' })
+      expect(log).toHaveBeenCalledWith(error)
+    } finally {
+      log.mockRestore()
+    }
+  })
+
   test('rejects a request without a locale', async () => {
     const { app } = createTestApp()
 

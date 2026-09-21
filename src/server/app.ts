@@ -1,6 +1,8 @@
 import { Hono } from 'hono'
+import { ZodError } from 'zod'
 import { sendEmailTemplate } from '../services/sendEmailTemplate.js'
 import { renderEmailTemplate } from '../services/renderEmailTemplate.js'
+import { MailServerValidationError } from '../errors.js'
 import type { CreateOptions } from '../types.js'
 
 type Data = {
@@ -18,11 +20,32 @@ export const createApp = <Env extends object>(
 ) => {
   const app = new Hono<{ Bindings: Env }>()
 
+  app.onError((error, c) => {
+    if (
+      error instanceof ZodError ||
+      error instanceof MailServerValidationError
+    ) {
+      return c.json({ error: 'Invalid params' }, 422)
+    }
+
+    console.error(error)
+    return c.json({ error: 'Internal Server Error' }, 500)
+  })
+
   app.post('/emails/:emailTemplate/render/:format', async (c) => {
     const options = createOptions({ env: c.env })
     const emailTemplate = c.req.param('emailTemplate')
     const format = c.req.param('format')
-    const data = await c.req.json<Data>()
+    let data: Data
+    try {
+      data = await c.req.json<Data>()
+    } catch {
+      return c.json({ error: 'Invalid JSON' }, 400)
+    }
+
+    if (!data || typeof data !== 'object') {
+      return c.json({ error: 'Invalid params' }, 422)
+    }
 
     const email = await renderEmailTemplate({
       options,
@@ -53,10 +76,22 @@ export const createApp = <Env extends object>(
       })
     }
 
-    const data = await c.req.json<Data>()
+    let data: Data
+    try {
+      data = await c.req.json<Data>()
+    } catch {
+      return c.json({ error: 'Invalid JSON' }, 400)
+    }
     const emailTemplate = c.req.param('emailTemplate')
 
-    if (!data?.to?.email || !data?.locale || !emailTemplate) {
+    if (
+      typeof data?.to?.email !== 'string' ||
+      !data.to.email ||
+      typeof data.locale !== 'string' ||
+      !data.locale ||
+      (data.subject != null && typeof data.subject !== 'string') ||
+      !emailTemplate
+    ) {
       return new Response(JSON.stringify({ error: 'Invalid params' }), {
         status: 422,
         headers: { 'Content-Type': 'application/json' },

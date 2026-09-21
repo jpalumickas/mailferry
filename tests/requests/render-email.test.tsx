@@ -51,4 +51,30 @@ describe('POST /emails/:emailTemplate/render/:format', () => {
 
     expect(await res.text()).toBe('Welcome undefined (en)')
   })
+
+  test('returns 422 for an unsupported locale', async () => {
+    const res = await render('html', { locale: 'fr' })
+
+    expect(res.status).toBe(422)
+    expect(await res.json()).toStrictEqual({ error: 'Invalid params' })
+  })
+
+  test('returns 422 for a null body', async () => {
+    const res = await render('html', null)
+
+    expect(res.status).toBe(422)
+    expect(await res.json()).toStrictEqual({ error: 'Invalid params' })
+  })
+
+  test('returns 400 for malformed JSON', async () => {
+    const { app } = createTestApp()
+    const res = await app.request('/emails/welcome/render/html', {
+      method: 'POST',
+      body: '{',
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    expect(res.status).toBe(400)
+    expect(await res.json()).toStrictEqual({ error: 'Invalid JSON' })
+  })
 })

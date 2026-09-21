@@ -8,7 +8,7 @@ export type Options = {
     email: string
     name?: string
   }
-  onError?: (error: unknown) => void
+  onError?: (error: unknown) => void | Promise<void>
   provider: Provider
   createSubject?: (options: {
     locale: string

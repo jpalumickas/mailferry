@@ -18,45 +18,52 @@ export const createQueue =
   async (batch: MessageBatch<Data>, env: Env) => {
     const options = createOptions({ env })
 
+    let messages: (typeof batch.messages)[number][]
     try {
-      for (const message of batch.messages) {
-        try {
-          const subject =
-            message.body.subject ||
-            (options.createSubject
-              ? await options.createSubject({
-                  locale: message.body.locale,
-                  template: message.body.template,
-                })
-              : undefined)
-
-          if (!subject?.trim()) {
-            throw new MailServerValidationError('Subject is required')
-          }
-
-          await sendEmailTemplate({
-            options,
-            data: {
-              emailTemplate: message.body.template,
-              locale: message.body.locale,
-              to: message.body.to,
-              subject,
-              data: message.body.data || {},
-            },
-          })
-        } catch (error) {
-          if (options.onError) {
-            options.onError(error)
-          } else {
-            throw error
-          }
-        }
-      }
+      messages = Array.from(batch.messages)
     } catch (error) {
       if (options.onError) {
-        options.onError(error)
-      } else {
-        throw error
+        batch.retryAll()
+        await options.onError(error)
+        return
       }
+      throw error
+    }
+
+    for (const message of messages) {
+      try {
+        const subject =
+          message.body.subject?.trim() ||
+          (options.createSubject
+            ? await options.createSubject({
+                locale: message.body.locale,
+                template: message.body.template,
+              })
+            : undefined)
+
+        if (!subject?.trim()) {
+          throw new MailServerValidationError('Subject is required')
+        }
+
+        await sendEmailTemplate({
+          options,
+          data: {
+            emailTemplate: message.body.template,
+            locale: message.body.locale,
+            to: message.body.to,
+            subject,
+            data: message.body.data || {},
+          },
+        })
+      } catch (error) {
+        if (!options.onError) {
+          throw error
+        }
+        message.retry()
+        await options.onError(error)
+        continue
+      }
+
+      message.ack()
     }
   }

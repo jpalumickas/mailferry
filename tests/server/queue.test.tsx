@@ -84,6 +84,25 @@ describe('createQueue', () => {
     })
   })
 
+  test('uses the translated subject for a queued email', async () => {
+    const { queue, sendEmail } = createTestQueue({
+      availableLocales: ['en'],
+      supportedLocales: undefined,
+      translations: {
+        welcome: { en: { subject: 'Welcome {{name}}' } },
+      },
+    })
+
+    await queue(
+      batchOf({ ...message, subject: null, data: { name: 'Jane' } }),
+      {}
+    )
+
+    expect(sendEmail).toHaveBeenCalledWith({
+      data: expect.objectContaining({ subject: 'Welcome Jane' }),
+    })
+  })
+
   test('throws when the subject is missing and no onError is given', async () => {
     const { queue } = createTestQueue()
 

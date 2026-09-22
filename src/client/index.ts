@@ -3,7 +3,7 @@ export type Recipient = {
   name?: string
 }
 
-export type TemplateData = Record<string, string | number>
+export type TemplateData = object
 
 export type SendEmailInput = {
   template: string

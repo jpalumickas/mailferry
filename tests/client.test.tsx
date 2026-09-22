@@ -10,7 +10,9 @@ const createFixture = (accessToken = 'test-token') => {
     supportedLocales: ['en'],
     from: { email: 'company@example.com' },
     templates: {
-      welcome: ({ data }: any) => <div>Welcome {data.name}</div>,
+      welcome: ({ data }: any) => (
+        <div>Welcome {data.name || data.inviter?.firstName}</div>
+      ),
     },
   }))
   const fetch: typeof globalThis.fetch = async (input, init) =>
@@ -42,6 +44,26 @@ describe('mailferry client', () => {
       response: { id: 'sent-id' },
     })
     expect(sendEmail).toHaveBeenCalledOnce()
+  })
+
+  test('sends named data with nested fields', async () => {
+    const { client, sendEmail } = createFixture()
+    const data: { inviter: { firstName: string }; code: string } = {
+      inviter: { firstName: 'Jane' },
+      code: '1234',
+    }
+
+    await client.send({
+      template: 'welcome',
+      locale: 'en',
+      to: { email: 'person@example.com' },
+      subject: 'Welcome',
+      data,
+    })
+
+    expect(sendEmail).toHaveBeenCalledWith({
+      data: expect.objectContaining({ text: 'Welcome Jane' }),
+    })
   })
 
   test('renders html and plain text through the HTTP handler', async () => {

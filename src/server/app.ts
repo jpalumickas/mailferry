@@ -4,16 +4,17 @@ import { sendEmailTemplate } from '../services/sendEmailTemplate.js'
 import { renderEmailTemplate } from '../services/renderEmailTemplate.js'
 import { MailServerValidationError } from '../errors.js'
 import { tokensMatch } from '../utils/tokensMatch.js'
+import { resolveSubject } from '../services/translations.js'
 import type { CreateOptions, Options } from '../types.js'
 
 type Data = {
   locale: string
   to: {
     email: string
-    name: string
+    name?: string
   }
   subject?: string | undefined | null
-  data?: Record<string, string | number>
+  data?: Record<string, unknown>
 }
 
 export const createApp = <Env extends object>(
@@ -116,14 +117,13 @@ export const createApp = <Env extends object>(
       })
     }
 
-    const subject =
-      data.subject?.trim() ||
-      (options.createSubject
-        ? await options.createSubject({
-            locale: data.locale,
-            template: emailTemplate,
-          })
-        : undefined)
+    const subject = await resolveSubject({
+      options,
+      subject: data.subject,
+      locale: data.locale,
+      template: emailTemplate,
+      data: data.data || {},
+    })
 
     if (!subject?.trim()) {
       return new Response(JSON.stringify({ error: 'Subject is required' }), {

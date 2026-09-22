@@ -1,6 +1,7 @@
 {
   "name": "mailferry",
   "version": "0.6.0",
+  "license": "MIT",
   "type": "module",
   "repository": "https://github.com/jpalumickas/mailferry",
   "publishConfig": {
@@ -45,6 +46,7 @@
   "dependencies": {
     "@react-email/render": "^2.1.0",
     "hono": "^4.13.8",
+    "i18next": "^26.4.2",
     "zod": "^4.6.5"
   },
   "devDependencies": {

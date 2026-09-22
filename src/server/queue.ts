@@ -1,5 +1,6 @@
 import { MailServerValidationError } from '../errors.js'
 import { sendEmailTemplate } from '../services/sendEmailTemplate.js'
+import { resolveSubject } from '../services/translations.js'
 import type { CreateOptions } from '../types.js'
 
 type Data = {
@@ -7,10 +8,10 @@ type Data = {
   locale: string
   to: {
     email: string
-    name: string
+    name?: string
   }
-  subject: string | undefined | null
-  data?: Record<string, string | number>
+  subject?: string | null
+  data?: Record<string, unknown>
 }
 
 export const createQueue =
@@ -32,14 +33,13 @@ export const createQueue =
 
     for (const message of messages) {
       try {
-        const subject =
-          message.body.subject?.trim() ||
-          (options.createSubject
-            ? await options.createSubject({
-                locale: message.body.locale,
-                template: message.body.template,
-              })
-            : undefined)
+        const subject = await resolveSubject({
+          options,
+          subject: message.body.subject,
+          locale: message.body.locale,
+          template: message.body.template,
+          data: message.body.data || {},
+        })
 
         if (!subject?.trim()) {
           throw new MailServerValidationError('Subject is required')

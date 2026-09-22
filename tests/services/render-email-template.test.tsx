@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'vitest'
 import { renderEmailTemplate } from '../../src/services/renderEmailTemplate'
 import { MailServerValidationError } from '../../src/errors'
+import type { TranslatedEmailTemplateProps } from '../../src/types'
 
 describe('renderEmailTemplate', () => {
   const options = {
@@ -38,6 +39,67 @@ describe('renderEmailTemplate', () => {
 
     expect(email.text).toBe('Hello Juan (es)')
     expect(email.html).toContain('<div>Hello Juan (es)</div>')
+  })
+
+  test('translates concurrent renders with the requested locales', async () => {
+    const translatedOptions = {
+      availableLocales: ['en', 'es'],
+      translations: {
+        greeting: {
+          en: { title: 'Hello {{name}}' },
+          es: { title: 'Hola {{name}}' },
+        },
+        common: {
+          en: { footer: 'Thanks' },
+          es: { footer: 'Gracias' },
+        },
+      },
+      templates: {
+        greeting: ({
+          data,
+          i18n,
+        }: TranslatedEmailTemplateProps<{ name: string }>) => (
+          <div>
+            {i18n.t('title', { name: data.name })} — {i18n.t('common:footer')}
+          </div>
+        ),
+      },
+    }
+
+    const [english, spanish] = await Promise.all([
+      renderEmailTemplate({
+        options: translatedOptions,
+        template: 'greeting',
+        locale: 'en',
+        data: { name: 'Jane' },
+      }),
+      renderEmailTemplate({
+        options: translatedOptions,
+        template: 'greeting',
+        locale: 'es',
+        data: { name: 'Juan' },
+      }),
+    ])
+
+    expect(english.text).toBe('Hello Jane — Thanks')
+    expect(spanish.text).toBe('Hola Juan — Gracias')
+  })
+
+  test('rejects a missing translation for the requested locale', async () => {
+    await expect(
+      renderEmailTemplate({
+        options: {
+          availableLocales: ['en', 'es'],
+          translations: { welcome: { en: { title: 'Welcome' } } },
+          templates: { welcome: () => <div>Welcome</div> },
+        },
+        template: 'welcome',
+        locale: 'es',
+        data: {},
+      })
+    ).rejects.toThrow(
+      'Translations for template welcome and locale es not found'
+    )
   })
 
   test('strips the react-email- prefix from html', async () => {

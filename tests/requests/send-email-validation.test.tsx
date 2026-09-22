@@ -210,6 +210,55 @@ describe('POST /emails/:emailTemplate/send', () => {
     expect(sendEmail).toHaveBeenCalledOnce()
   })
 
+  test('uses the translated subject when no subject is given', async () => {
+    const { app, sendEmail } = createTestApp({
+      availableLocales: ['en', 'lt'],
+      supportedLocales: undefined,
+      translations: {
+        welcome: {
+          en: { subject: 'Welcome {{name}}', title: 'Hello' },
+          lt: { subject: 'Sveiki, {{name}}', title: 'Labas' },
+        },
+      },
+      templates: {
+        welcome: ({ i18n }: any) => <div>{i18n.t('title')}</div>,
+      },
+    })
+
+    const res = await send(app, {
+      body: JSON.stringify({
+        ...body,
+        locale: 'lt',
+        subject: null,
+        data: { name: 'Jonas' },
+      }),
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    expect(res.status).toBe(200)
+    expect(sendEmail).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        subject: 'Sveiki, Jonas',
+        text: 'Labas',
+      }),
+    })
+  })
+
+  test('rejects a missing translated subject', async () => {
+    const { app, sendEmail } = createTestApp({
+      availableLocales: ['en'],
+      translations: { welcome: { en: { title: 'Hello' } } },
+    })
+
+    const res = await send(app, {
+      body: JSON.stringify({ ...body, subject: null }),
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    expect(res.status).toBe(422)
+    expect(sendEmail).not.toHaveBeenCalled()
+  })
+
   test('passes the rendered email to the provider', async () => {
     const { app, sendEmail } = createTestApp()
 

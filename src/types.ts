@@ -1,8 +1,30 @@
 import type { z } from 'zod'
+import type { i18n } from 'i18next'
 import type { emailDataSchema } from './validationSchemas/emailDataSchema.js'
 
-export type Options = {
-  supportedLocales: string[]
+export type Translations = Record<
+  string,
+  Record<string, Record<string, unknown>>
+>
+
+export type EmailI18n = Pick<i18n, 't' | 'language'>
+
+export type TranslatedEmailTemplateProps<Data = unknown> = {
+  locale: string
+  data: Data
+  i18n: EmailI18n
+}
+
+type LocaleOptions =
+  | { availableLocales: string[]; supportedLocales?: string[] }
+  | {
+      availableLocales?: string[]
+      /** @deprecated Use availableLocales instead. */
+      supportedLocales: string[]
+    }
+
+export type Options = LocaleOptions & {
+  translations?: Translations
   templates: EmailTemplates
   from: {
     email: string

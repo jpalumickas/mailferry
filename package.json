@@ -65,6 +65,7 @@
   },
   "scripts": {
     "build": "tsdown",
+    "prepack": "npm run build",
     "dev": "tsdown --watch",
     "test": "vitest run",
     "test:dev": "vitest dev",

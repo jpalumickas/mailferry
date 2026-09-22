@@ -68,16 +68,17 @@ describe('POST /emails/:emailTemplate/send', () => {
     expect(sendEmail).not.toHaveBeenCalled()
   })
 
-  test('rejects requests when no access token is configured', async () => {
+  test('allows requests without a bearer token when no access token is configured', async () => {
     const { app, sendEmail } = createTestApp({ accessToken: undefined })
 
-    const res = await send(app, {
+    const res = await app.request('/emails/welcome/send', {
+      method: 'POST',
       body: JSON.stringify(body),
       headers: { 'Content-Type': 'application/json' },
     })
 
-    expect(res.status).toBe(401)
-    expect(sendEmail).not.toHaveBeenCalled()
+    expect(res.status).toBe(200)
+    expect(sendEmail).toHaveBeenCalledOnce()
   })
 
   test('rejects a request without a json content type', async () => {

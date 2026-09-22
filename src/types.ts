@@ -9,7 +9,7 @@ export type Options = {
     name?: string
   }
   onError?: (error: unknown) => void | Promise<void>
-  /** Required for HTTP requests; queue consumers do not use this token. */
+  /** When set, HTTP requests require a matching bearer token; queues do not. */
   accessToken?: string
   provider: Provider
   createSubject?: (options: {

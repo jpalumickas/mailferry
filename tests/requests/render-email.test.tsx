@@ -96,4 +96,22 @@ describe('POST /emails/:emailTemplate/render/:format', () => {
     expect(res.status).toBe(401)
     expect(await res.json()).toStrictEqual({ error: 'Unauthorized' })
   })
+
+  test('renders without a bearer token when no access token is configured', async () => {
+    const { app } = createApp(() => ({
+      provider: { sendEmail: vi.fn() },
+      supportedLocales: ['en'],
+      from: { email: 'company@example.com' },
+      templates: { welcome: () => <div>Welcome</div> },
+    }))
+
+    const res = await app.request('/emails/welcome/render/html', {
+      method: 'POST',
+      body: JSON.stringify({ locale: 'en' }),
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    expect(res.status).toBe(200)
+    expect(await res.text()).toContain('<div>Welcome</div>')
+  })
 })

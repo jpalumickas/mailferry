@@ -27,9 +27,8 @@ export const createApp = <Env extends object>(
     const provided = /^Bearer ([^\s]+)$/i.exec(authorization || '')?.[1]
 
     if (
-      !options.accessToken ||
-      !provided ||
-      !(await tokensMatch(provided, options.accessToken))
+      options.accessToken &&
+      (!provided || !(await tokensMatch(provided, options.accessToken)))
     ) {
       c.header('WWW-Authenticate', 'Bearer')
       return c.json({ error: 'Unauthorized' }, 401)

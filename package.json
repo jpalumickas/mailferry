@@ -2,6 +2,7 @@
   "name": "mailferry",
   "version": "0.6.0",
   "type": "module",
+  "repository": "https://github.com/jpalumickas/mailferry",
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
   },

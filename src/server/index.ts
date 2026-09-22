@@ -1,6 +1,6 @@
-import { createApp } from './server/app.js'
-import { createQueue } from './server/queue.js'
-import type { CreateOptions } from './types.js'
+import { createApp } from './app.js'
+import { createQueue } from './queue.js'
+import type { CreateOptions } from '../types.js'
 
 export const createHandler = <Env extends object>(
   createOptions: CreateOptions<Env>
@@ -14,4 +14,4 @@ export const createHandler = <Env extends object>(
   }
 }
 
-export { renderEmailTemplate } from './services/renderEmailTemplate.js'
+export { renderEmailTemplate } from '../services/renderEmailTemplate.js'

@@ -1,7 +1,11 @@
 {
   "clean": true,
   "dts": { "sourcemap": false },
-  "entry": ["src/index.ts", "src/providers/mailgun/index.ts"],
+  "entry": [
+    "src/client/index.ts",
+    "src/server/index.ts",
+    "src/providers/mailgun/index.ts"
+  ],
   "format": ["cjs", "esm"],
   "minify": true,
   "sourcemap": true

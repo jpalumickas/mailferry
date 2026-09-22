@@ -1,5 +1,5 @@
 import { describe, test, expect, vi } from 'vitest'
-import { createHandler } from '../src/index'
+import { createHandler } from '../src/server'
 import type { Options } from '../src/types'
 
 const createTestHandler = (overrides: Partial<Options> = {}) => {

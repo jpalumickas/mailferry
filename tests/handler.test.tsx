@@ -18,7 +18,7 @@ const createTestHandler = (overrides: Partial<Options> = {}) => {
 }
 
 describe('createHandler', () => {
-  test('exposes a fetch handler backed by the app', async () => {
+  test('serves fetch requests without a Worker execution context', async () => {
     const { handler, sendEmail } = createTestHandler()
 
     const res = await handler.fetch(
@@ -34,8 +34,7 @@ describe('createHandler', () => {
           'Content-Type': 'application/json',
         },
       }),
-      {},
-      {} as ExecutionContext
+      {}
     )
 
     expect(res.status).toBe(200)

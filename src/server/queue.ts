@@ -14,12 +14,24 @@ type Data = {
   data?: Record<string, unknown>
 }
 
+type QueueMessage<Body> = {
+  body: Body
+  ack(): void
+  retry(): void
+}
+
+/** The queue methods Mailferry needs, compatible with Cloudflare queue batches. */
+export type QueueBatch<Body> = {
+  messages: Iterable<QueueMessage<Body>>
+  retryAll(): void
+}
+
 export const createQueue =
   <Env extends object>(createOptions: CreateOptions<Env>) =>
-  async (batch: MessageBatch<Data>, env: Env) => {
+  async (batch: QueueBatch<Data>, env: Env) => {
     const options = createOptions({ env })
 
-    let messages: (typeof batch.messages)[number][]
+    let messages: QueueMessage<Data>[]
     try {
       messages = Array.from(batch.messages)
     } catch (error) {

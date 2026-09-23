@@ -4,7 +4,8 @@
   "entry": [
     "src/client/index.ts",
     "src/server/index.ts",
-    "src/providers/mailgun/index.ts"
+    "src/providers/mailgun/index.ts",
+    "src/providers/cloudflare/index.ts"
   ],
   "format": ["cjs", "esm"],
   "minify": true,

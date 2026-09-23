@@ -1,13 +1,16 @@
 {
   "name": "mailferry",
   "version": "0.6.0",
-  "description": "Render and send localized React email templates from Cloudflare Workers",
+  "description": "Render and send localized React email templates with a Fetch API handler",
   "keywords": [
     "email",
     "react",
     "react-email",
+    "fetch-api",
+    "hono",
     "cloudflare-workers",
-    "mailgun"
+    "mailgun",
+    "cloudflare-email"
   ],
   "license": "MIT",
   "type": "module",
@@ -39,6 +42,16 @@
       "default": {
         "types": "./dist/server/index.d.mts",
         "default": "./dist/server/index.mjs"
+      }
+    },
+    "./providers/cloudflare": {
+      "require": {
+        "types": "./dist/providers/cloudflare/index.d.cts",
+        "default": "./dist/providers/cloudflare/index.cjs"
+      },
+      "default": {
+        "types": "./dist/providers/cloudflare/index.d.mts",
+        "default": "./dist/providers/cloudflare/index.mjs"
       }
     },
     "./providers/mailgun": {

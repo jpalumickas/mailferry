@@ -1,6 +1,6 @@
 {
   "name": "mailferry",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Render and send localized React email templates with a Fetch API handler",
   "keywords": [
     "email",

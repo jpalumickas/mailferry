@@ -1,10 +1,18 @@
 # mailferry
 
-Render and send React email templates through an HTTP handler or a Cloudflare queue consumer.
+Render and send localized React email templates from a Cloudflare Worker. Mailferry provides an HTTP handler, a queue consumer, a client, and a Mailgun provider.
 
-## Server implementation
+## Install
 
-Configure locales and translations in `emailConfig.ts`:
+```sh
+npm install mailferry react react-dom
+```
+
+Node.js 20 or newer is required for Node-based builds. To use React Email's preview UI, also install `react-email` as a development dependency.
+
+## Define and serve emails
+
+Configure locales and translations in `emailConfig.ts`. Each template needs a translation entry with the same name:
 
 ```ts
 import { createEmails } from 'mailferry/server'
@@ -24,7 +32,7 @@ export const emails = createEmails({
 })
 ```
 
-Define `emails/WelcomeEmail.tsx` for both sending and React Email previews:
+Define `emails/WelcomeEmail.tsx`. `PreviewProps` supplies sample data for React Email's preview UI:
 
 ```tsx
 import { emails } from '../emailConfig'
@@ -43,7 +51,7 @@ WelcomeEmail.PreviewProps = { locale: 'lt', data: { name: 'Jonas' } }
 export default WelcomeEmail
 ```
 
-Register the template in your worker:
+Register the template in your Cloudflare Worker. Set the Mailgun credentials and access token as Worker secrets or environment bindings:
 
 ```ts
 import { createMailgunProvider } from 'mailferry/providers/mailgun'
@@ -69,15 +77,30 @@ export default emails.createHandler<{
 }))
 ```
 
-The template's translation entry supplies the subject when a send omits it. An explicit subject takes precedence. `createSubject`, when configured, takes precedence over the translated subject. The existing `createHandler` map API and `supportedLocales` remain available.
+The exported handler serves HTTP requests and consumes Cloudflare queue messages. For sends, an explicit `subject` takes precedence, followed by `createSubject` if configured, then the template's translated `subject`.
 
 ### HTTP authentication
 
-Optionally set `accessToken` in the options returned by `emails.createHandler`. In a Cloudflare Worker, read it from a secret binding (for example, `accessToken: env.MAILFERRY_ACCESS_TOKEN`). Keep this token in trusted server code; do not include it in a browser bundle.
+Set `accessToken` in the options returned by `emails.createHandler` to protect the HTTP endpoints. Read it from a Worker secret binding and keep it in trusted server code; do not include it in a browser bundle.
 
-When `accessToken` is configured, both `/emails/:template/send` and `/emails/:template/render/:format` require an `Authorization: Bearer <token>` header. Missing or incorrect tokens receive `401 Unauthorized`. Without an access token, these HTTP endpoints are unauthenticated. Queue messages do not use this token.
+When `accessToken` is configured, both `POST /emails/:template/send` and `POST /emails/:template/render/:format` require an `Authorization: Bearer <token>` header. Missing or incorrect tokens receive `401 Unauthorized`. Without an access token, these HTTP endpoints are unauthenticated. Queue messages do not use this token.
 
-## Client implementation
+### Queue messages
+
+To send through a Cloudflare queue, enqueue a message with the template name, locale, recipient, and template data. This example assumes a producer binding named `EMAIL_QUEUE`:
+
+```ts
+await env.EMAIL_QUEUE.send({
+  template: 'welcome',
+  locale: 'en',
+  to: { email: 'person@example.com' },
+  data: { name: 'Person' },
+})
+```
+
+The queue consumer uses the same template and subject rules as the HTTP handler. A `subject` field is optional when the template has a translated subject or `createSubject` is configured.
+
+## Send and render from server code
 
 ```ts
 import { createClient } from 'mailferry/client'
@@ -102,20 +125,7 @@ const html = await mail.render({
 })
 ```
 
-`send` returns the handler's JSON response. `render` returns the rendered HTML or plain text. Failed HTTP responses throw `MailferryHttpError` with a `status` property.
-
-## Publishing to npm
-
-From a fresh checkout, install dependencies and sign in to the public npm registry:
-
-```sh
-pnpm install --frozen-lockfile
-npm login --registry=https://registry.npmjs.org
-npm whoami --registry=https://registry.npmjs.org
-npm publish
-```
-
-The `prepack` script builds the `dist` files before publication. Publishing requires npm two-factor authentication or a granular access token that can bypass it. The `mailferry` name is unscoped, so `--access public` is unnecessary.
+`send` returns the handler's JSON response. `render` returns HTML with `format: 'html'` or plain text with `format: 'txt'`. Failed HTTP responses throw `MailferryHttpError` with a `status` property. Keep the client and its access token in server code.
 
 ## License
 
